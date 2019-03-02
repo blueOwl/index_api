@@ -99,7 +99,6 @@ class QueryResult:
 			self.rebuild()
 			past_num = 0
 		need_past = (page_num - 1) * self.page_size
-		print('past', need_past, past_num)
 		count = 0
 		if (need_past - past_num) > 0:
 			for i in self.gen:
@@ -141,15 +140,21 @@ class QueryResult:
 	def has_next(self):
 		if self.cur_page:return True
 		return False
+	def get_page_info(self):
+		return {"page_num":self.page_num - 1,
+		 "total_page":self.total_page,
+		 "page_size":self.page_size}
 		
 #query part
 class Retrieve:
 	def __init__(self, dataset):
 		self.dataset = dataset
 		self.r = init_dataset(dataset)
+		self.col_filter = list
 
 	def region_query(self, chrom, start, end, col_filter=list):
 		if not chrom in self.r['used_chroms_names']:return QueryResult([])
+		self.col_filter = col_filter
 		try:
 			start, end = int(start), int(end)
 		except:
@@ -171,7 +176,7 @@ class Retrieve:
 		if not chrom: chrom = self.r['used_chroms_names'][0]
 		if not chrom in self.r['used_chroms_names']:
 			return {}
-		return {i:self.r['used_header'][chrom][i] for i in range(len(self.r['used_header'][chrom]))}
+		return {i:self.r['used_header'][chrom][i] for i in self.col_filter(range(len(self.r['used_header'][chrom])))}
 
 	def get_des_file_name(self):
 		return self.r["des_files"][0]

@@ -65,6 +65,7 @@ def get_region(dataset):
 	#prepare result
 	retrieve = dbs[dataset].region_query(chrom, start, end, col_filter)
 	page = retrieve.get_cur_page()
+	pid = ''
 	if retrieve.has_next():
 		pid = PH.put(retrieve)
 		next_page = config.HOST + "/nextpage/" + pid
@@ -74,7 +75,26 @@ def get_region(dataset):
 	res = { 'format': 'json', 
 		'data':page,
 		'next_page': next_page,
+		'page_info': retrieve.get_page_info(),
+		'page_id':pid,
 		'headers': header}
+	return jsonify(res)
+
+@app.route('/gotopage/<string:pid>/<int:pnum>')
+def get_page(pid, pnum):
+	retrieve = PH.get(pid)
+	if not retrieve: abort(404)
+	page = retrieve.get_page(pnum)
+	if not page: abort(404)
+	if retrieve.has_next():
+		next_page = config.HOST + "/nextpage/" + pid
+	else:
+		next_page =  'None'
+	res = { 'format': 'json', 
+		'data':page,
+		'page_info': retrieve.get_page_info(),
+		'page_id':pid,
+		'next_page': next_page}
 	return jsonify(res)
 
 @app.route('/nextpage/<string:pid>')
@@ -90,6 +110,8 @@ def get_nextpage(pid):
 		del PH[pid]
 	res = { 'format': 'json', 
 		'data':page,
+		'page_info': retrieve.get_page_info(),
+		'page_id':pid,
 		'next_page': next_page}
 	return jsonify(res)
 
