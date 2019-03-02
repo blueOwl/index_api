@@ -70,21 +70,6 @@ e.g. `/anno_tree/HRC`
 
 **Return example:** 
 
-~~~
-{ 
-	4:"ANNOVAR_ensembl_Effect",
-	5:"ANNOVAR_ensembl_Transcript_ID",
-	...
-}
-~~~
-
-#### 3.2 Get Original Data Files
-
-To download all original data files, request the download url by 
-
-`/api/origin/<string:dataset name>`
-
-**Return example:**
 
 ~~~
 {"header_tree_array":[
@@ -97,6 +82,23 @@ To download all original data files, request the download url by
 }
 	 
 ~~~
+
+#### 3.2 Get Original Data Files
+
+To download all original data files, request the download url by 
+
+`/api/origin/<string:dataset name>`
+
+**Return example:**
+
+~~~
+{ 
+	4:"ANNOVAR_ensembl_Effect",
+	5:"ANNOVAR_ensembl_Transcript_ID",
+	...
+}
+~~~
+
 
 ### 3.3 Region query
 
