@@ -132,4 +132,4 @@ def get_anno_tree(dataset):
 	tree_dic = get_anno_tree_dic(dataset)
 	return jsonify({"header_tree_array":[tree_dic[i].get_dic() for i in sorted(tree_dic.keys())]})
 
-app.run(port=5000 )
+app.run(host="0.0.0.0", port=5000)
