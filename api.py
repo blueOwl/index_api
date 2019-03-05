@@ -63,11 +63,11 @@ def get_region(dataset):
 		abort(400)
 
 	#prepare result
-	retrieve = dbs[dataset].region_query(chrom, start, end, col_filter)
-	page = retrieve.get_cur_page()
+	query_result = dbs[dataset].region_query(chrom, start, end, col_filter)
+	page = query_result.get_cur_page()
 	pid = ''
-	if retrieve.has_next():
-		pid = PH.put(retrieve)
+	if query_result.has_next():
+		pid = PH.put(query_result)
 		next_page = config.HOST + "/nextpage/" + pid
 	else:
 		next_page =  'None'
@@ -75,43 +75,53 @@ def get_region(dataset):
 	res = { 'format': 'json', 
 		'data':page,
 		'next_page': next_page,
-		'page_info': retrieve.get_page_info(),
+		'page_info': query_result.get_page_info(),
 		'page_id':pid,
 		'headers': header}
 	return jsonify(res)
 
 @app.route('/gotopage/<string:pid>/<int:pnum>')
 def get_page(pid, pnum):
-	retrieve = PH.get(pid)
-	if not retrieve: abort(404)
-	page = retrieve.get_page(pnum)
+	query_result = PH.get(pid)
+	if not query_result: abort(404)
+	page = query_result.get_page(pnum)
 	if not page: abort(404)
-	if retrieve.has_next():
+	if query_result.has_next():
 		next_page = config.HOST + "/nextpage/" + pid
 	else:
 		next_page =  'None'
 	res = { 'format': 'json', 
 		'data':page,
-		'page_info': retrieve.get_page_info(),
+		'page_info': query_result.get_page_info(),
 		'page_id':pid,
+		'headers':query_result.headers,
 		'next_page': next_page}
+	return jsonify(res)
+
+@app.route('/total_res/<string:pid>')
+def get_download_url(pid):
+	query_result = PH.get(pid)
+	if not query_result: abort(404)
+	filename = query_result.write_to_file(config.TMPDIR[query_result.info.get('dataset')])
+	res = {"url": config.HOST + "/download/" + 'tmp/' + filename}
 	return jsonify(res)
 
 @app.route('/nextpage/<string:pid>')
 def get_nextpage(pid):
-	retrieve = PH.get(pid)
-	if not retrieve: abort(404)
-	page = retrieve.get_cur_page()
+	query_result = PH.get(pid)
+	if not query_result: abort(404)
+	page = query_result.get_cur_page()
 	if not page: abort(404)
-	if retrieve.has_next():
+	if query_result.has_next():
 		next_page = config.HOST + "/nextpage/" + pid
 	else:
 		next_page =  'None'
 		del PH[pid]
 	res = { 'format': 'json', 
 		'data':page,
-		'page_info': retrieve.get_page_info(),
+		'page_info': query_result.get_page_info(),
 		'page_id':pid,
+		'headers':query_result.headers,
 		'next_page': next_page}
 	return jsonify(res)
 

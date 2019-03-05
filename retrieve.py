@@ -63,11 +63,13 @@ def init_dataset(dataset):
 	return retrieve
 	
 class QueryResult:
-	def __init__(self, generator, generator_kargs, page_size = config.page_size, col_converter=list):
+	def __init__(self, generator, generator_kargs={}, page_size = config.page_size, col_converter=list):
+		self.headers = []
 		self.col_converter = col_converter
 		self.generator = generator
 		self.gen_kargs = generator_kargs
 		self.page_size = page_size
+		self.info = {}
 
 		self.exceed = False	
 		self.records_num = self.get_total_records_num()
@@ -105,9 +107,10 @@ class QueryResult:
 				count += 1
 				if count == (need_past - past_num): break
 		self.page_num = page_num
-		num_page = next(self.pages)
-		self.get_cur_page()#update cur_page and page_num + 1
-		return num_page
+		certain_page = next(self.pages)
+		self.get_cur_page()
+		#update cur_page and page_num + 1
+		return certain_page
 
 	def get_total_records_num(self):
 		r_nums = 1
@@ -144,7 +147,23 @@ class QueryResult:
 		return {"page_num":self.page_num - 1,
 		 "total_page":self.total_page,
 		 "page_size":self.page_size}
-		
+
+	def write_to_file(self, res_dir = ''):
+		# 1.rebuld generator
+		# 2.write to file
+		# 3.rebuild and back to same page
+		# 4.return filenames
+		filename = str(uuid.uuid4())
+		f = open(res_dir + filename, 'w')
+		cur_page_num = self.page_num
+		self.rebuild()
+		if self.headers: f.write("#" + "\t".join(self.headers.values()) + "\n")
+		for item in self.gen:
+			line = '\t'.join(self.col_converter(item))
+			f.write(line + '\n')
+		self.rebuild()
+		self.get_page(cur_page_num - 1)
+		return filename
 #query part
 class Retrieve:
 	def __init__(self, dataset):
@@ -159,11 +178,14 @@ class Retrieve:
 			start, end = int(start), int(end)
 		except:
 			[]
-		return QueryResult(self.r['tabix_links'][chrom].fetch, {'reference':chrom, 'start':start, 'end':end, 'multiple_iterators':True, 'parser':pysam.asTuple()}, col_converter=col_filter)
+		q = QueryResult(self.r['tabix_links'][chrom].fetch, {'reference':chrom, 'start':start, 'end':end, 'multiple_iterators':True, 'parser':pysam.asTuple()}, col_converter=col_filter)
+		q.headers = self.get_headers()
+		q.info['dataset'] = self.dataset
+		return q
 
-	def query_to_file(self, chrom, start, end, cids = []):
+	def query_to_file(self, chrom, start, end, col_filter=list):
 		if not chrom in self.r['used_chroms_names']:return ''
-		if len(cids) == 0:cids = range(len(self.r['used_header'][chrom]))
+		cids = col_filter(range(len(self.r['used_header'][chrom])))
 		header = [self.r['used_header'][chrom][i] for i in cids]
 		filename = config.TMPDIR[self.dataset] + str(uuid.uuid4())
 		f = open(filename, 'w')
