@@ -1,6 +1,6 @@
 import os 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-page_size = 100	
+page_size = 50	
 res_max = 1000 * 1000
 
 data_dir = {"HRC":dir_path + '/data/'}

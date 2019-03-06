@@ -47,25 +47,25 @@ def generate_tree_dic(headers, des):
 		name = headers[i]
 		if headers[i] in des:
 			info = des[headers[i]]
-			if "_" in name:
-				parent_name = name.split('_')[0]
-				if parent_name in tree_dic:
-					parent_id = tree_dic[parent_name].id
-				else:
-					#make parent node
-					parent = Annotation_tree_node(nid=parent_id_count, name=parent_name)
-					tree_dic[parent_name] = parent
-					parent_id = parent_id_count
-					parent_id_count += 1
-				node = Annotation_tree_node(nid=nid, parent_id=parent_id, name=name, info=info)
-				tree_dic[name] = node
+		else: 
+			info = ''
+			continue
+		if "_" in name:
+			parent_name = name.split('_')[0]
+			if parent_name in tree_dic:
+				parent_id = tree_dic[parent_name].id
 			else:
-				#single node
-				node = Annotation_tree_node(nid=nid, name=name, info=info, parent_id=root.id)
-				tree_dic[name] = node
+				#make parent node
+				parent = Annotation_tree_node(nid=parent_id_count, name=parent_name)
+				tree_dic[parent_name] = parent
+				parent_id = parent_id_count
+				parent_id_count += 1
+			node = Annotation_tree_node(nid=nid, parent_id=parent_id, name=name, info=info)
+			tree_dic[name] = node
 		else:
-			#single node no info
-			node = Annotation_tree_node(nid=i, name=name, parent_id=root.id)
+			#single node
+			node = Annotation_tree_node(nid=nid, name=name, info=info, parent_id=root.id)
+			tree_dic[name] = node
 	return tree_dic
 
 
@@ -75,6 +75,7 @@ def get_anno_tree_dic(dataset):
 	headers = retrieve.get_headers()
 	tree_dic = generate_tree_dic(headers, des)
 	return tree_dic
+
 if __name__ == "__main__":
 	tree_dic = get_anno_tree_dic("HRC")
 	for k in tree_dic:

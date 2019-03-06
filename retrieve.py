@@ -62,6 +62,8 @@ def init_dataset(dataset):
 	retrieve = {"des_files": des_files, "tabix_links":sam_dic, "used_data_files":used_data_files, "used_chroms_names":used_chroms_names, "used_header":used_header}
 	return retrieve
 	
+def empty_generator(**kwargs): return []
+
 class QueryResult:
 	def __init__(self, generator, generator_kargs={}, page_size = config.page_size, col_converter=list):
 		self.headers = []
@@ -172,7 +174,7 @@ class Retrieve:
 		self.col_filter = list
 
 	def region_query(self, chrom, start, end, col_filter=list):
-		if not chrom in self.r['used_chroms_names']:return QueryResult([])
+		if not chrom in self.r['used_chroms_names']:return QueryResult(empty_generator)
 		self.col_filter = col_filter
 		try:
 			start, end = int(start), int(end)
