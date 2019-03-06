@@ -2,10 +2,12 @@ from retrieve import Retrieve
 from flask import Flask, jsonify, abort, session, request, send_from_directory
 from utils import PageHolder, index_get_func
 from parse_description_file import get_anno_tree_dic
+from flask_cors import CORS
 import config
 
 PH = PageHolder()
 app = Flask(__name__)
+CORS(app)
 #init retrieve motheds
 dbs = {}
 for k in ['HRC']:
