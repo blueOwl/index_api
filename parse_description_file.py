@@ -39,17 +39,16 @@ def parse_des_file(filename):
 
 
 def generate_tree_dic(headers, des):
-	root = Annotation_tree_node(parent_id=None)
+	root = Annotation_tree_node(parent_id=None, nid=10000)
 	tree_dic = {'root':root}
-	parent_id_count = len(headers.keys())
+	parent_id_count = len(headers.keys()) + 1
 	for i in headers:
 		nid = i
 		name = headers[i]
-		if headers[i] in des:
-			info = des[headers[i]]
+		if name in des:
+			info = des[name]
 		else: 
-			info = ''
-			continue
+			info = name
 		if "_" in name:
 			parent_name = name.split('_')[0]
 			if parent_name in tree_dic:
@@ -60,12 +59,11 @@ def generate_tree_dic(headers, des):
 				tree_dic[parent_name] = parent
 				parent_id = parent_id_count
 				parent_id_count += 1
-			node = Annotation_tree_node(nid=nid, parent_id=parent_id, name=name, info=info)
-			tree_dic[name] = node
+			node = Annotation_tree_node(nid=nid, name=name, info=info, parent_id=parent_id)
 		else:
 			#single node
 			node = Annotation_tree_node(nid=nid, name=name, info=info, parent_id=root.id)
-			tree_dic[name] = node
+		tree_dic[name] = node
 	return tree_dic
 
 
