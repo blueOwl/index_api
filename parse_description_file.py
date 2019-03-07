@@ -7,6 +7,7 @@ class Annotation_tree_node:
 		self.parent_id = parent_id
 		self.info = info
 		self.name = name
+		self.child = []
 	def get_dic(self):
 		return {'id' : self.id,
 			'name' : self.name,
@@ -60,10 +61,19 @@ def generate_tree_dic(headers, des):
 				parent_id = parent_id_count
 				parent_id_count += 1
 			node = Annotation_tree_node(nid=nid, name=name, info=info, parent_id=parent_id)
+			parent.child.append(node)
 		else:
 			#single node
 			node = Annotation_tree_node(nid=nid, name=name, info=info, parent_id=root.id)
+			root.child.append(node)
 		tree_dic[name] = node
+	#remove single child parent node
+	for name in list(tree_dic):
+		node = tree_dic[name]
+		if len(node.child) == 1:
+			child = node.child.pop()
+			child.parent_id = root.id
+			del tree_dic[name]
 	return tree_dic
 
 
