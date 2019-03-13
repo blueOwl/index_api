@@ -56,7 +56,7 @@ def generate_tree_dic(headers, des):
 				parent_id = tree_dic[parent_name].id
 			else:
 				#make parent node
-				parent = Annotation_tree_node(nid=parent_id_count, name=parent_name)
+				parent = Annotation_tree_node(nid=parent_id_count, name=parent_name, parent_id=root.id)
 				tree_dic[parent_name] = parent
 				parent_id = parent_id_count
 				parent_id_count += 1

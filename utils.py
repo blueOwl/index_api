@@ -1,15 +1,15 @@
 from uuid import uuid4
-
+import config
 def index_get_func(idx):
-	for i in range(4):
-		if not i in idx:idx.append(i)
 	valid_idx = []
 	def fil(row):
 		if len(row) == 0:return []
 		nonlocal valid_idx
 		if not valid_idx: 
 			max_idx = len(row)
-			valid_idx = sorted([i for i in idx if i < max_idx])
+			valid_idx = config.DEFAULT_IDXS + \
+				    sorted([i for i in idx if i < max_idx if not i in config.DEFAULT_IDXS])
+			#print(valid_idx)
 		return [row[i] for i in valid_idx]
 	return fil
 

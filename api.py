@@ -73,8 +73,7 @@ def get_region(dataset):
 		next_page = config.HOST + "/nextpage/" + pid
 	else:
 		next_page =  'None'
-	header = dbs[dataset].get_headers()
-	header = [header[i] for i in header.keys()]
+	header = dbs[dataset].get_header_list()
 	res = { 'format': 'json', 
 		'data':page,
 		'next_page': next_page,
@@ -94,7 +93,6 @@ def get_page(pid, pnum):
 	else:
 		next_page =  'None'
 	header = query_result.headers
-	header = [header[i] for i in header.keys()]
 	res = { 'format': 'json', 
 		'data':page,
 		'page_info': query_result.get_page_info(),
@@ -123,7 +121,6 @@ def get_nextpage(pid):
 		next_page =  'None'
 		del PH[pid]
 	header = query_result.headers
-	header = [header[i] for i in header.keys()]
 	res = { 'format': 'json', 
 		'data':page,
 		'page_info': query_result.get_page_info(),
@@ -137,6 +134,9 @@ def get_anno_tree(dataset):
 	if not dataset in dbs:
 		abort(404)
 	tree_dic = get_anno_tree_dic(dataset)
+	for idx in config.DEFAULT_IDXS: 
+		if idx in tree_dic:
+			del tree_dic[idx]
 	return jsonify({"header_tree_array":[tree_dic[i].get_dic() for i in sorted(tree_dic.keys())]})
 
 app.run(host="0.0.0.0", port=5000)
