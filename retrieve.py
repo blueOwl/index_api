@@ -72,6 +72,7 @@ class QueryResult:
 		self.gen_kargs = generator_kargs
 		self.page_size = page_size
 		self.info = {}
+		self.filename = None
 
 		self.exceed = False	
 		self.records_num = self.get_total_records_num()
@@ -159,12 +160,13 @@ class QueryResult:
 		f = open(res_dir + filename, 'w')
 		cur_page_num = self.page_num
 		self.rebuild()
-		if self.headers: f.write("#" + "\t".join(self.headers.values()) + "\n")
+		if self.headers: f.write("#" + "\t".join(self.headers) + "\n")
 		for item in self.gen:
 			line = '\t'.join(self.col_converter(item))
 			f.write(line + '\n')
 		self.rebuild()
 		self.get_page(cur_page_num - 1)
+		self.filename = filename
 		return filename
 #query part
 class Retrieve:

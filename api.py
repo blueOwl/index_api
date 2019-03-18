@@ -105,8 +105,10 @@ def get_page(pid, pnum):
 def get_download_url(pid):
 	query_result = PH.get(pid)
 	if not query_result: abort(404)
-	filename = query_result.write_to_file(config.TMPDIR[query_result.info.get('dataset')])
-	res = {"url": config.HOST + "/download/" + 'tmp/' + filename}
+	filename = query_result.filename
+	if not filename:
+		filename = query_result.write_to_file(config.TMPDIR[query_result.info.get('dataset')])
+	res = {"url": "/download/" + 'tmp/' + filename}
 	return jsonify(res)
 
 @app.route('/nextpage/<string:pid>')
