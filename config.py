@@ -4,6 +4,8 @@ page_size = 50
 res_max = 1000 * 1000
 
 data_dir = {"HRC":dir_path + '/data/'}
+gene_data = dir_path + '/data/' + 'Homo_sapiens.chromosomal_location_20180114'
+mapping_data = dir_path + '/data/' + 'mapping.dat' 
 
 TMPDIR = {"HRC": dir_path + '/tmp/'}
 DOWNLOAD_DIR = ['tmp','data']

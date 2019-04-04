@@ -3,6 +3,8 @@ from flask import Flask, jsonify, abort, session, request, send_from_directory
 from utils import PageHolder, index_get_func
 from parse_description_file import get_anno_tree_dic
 from flask_cors import CORS
+from hash_idx import H_idx
+from db import *
 import config
 
 PH = PageHolder()
@@ -12,6 +14,7 @@ CORS(app)
 dbs = {}
 for k in ['HRC']:
 	dbs[k] = Retrieve(k)
+idx_db = H_idx("HRC")
 
 #get /header/<dataset>
 @app.route('/header/<string:dataset>')
@@ -81,6 +84,57 @@ def get_region(dataset):
 		'page_id':pid,
 		'headers': header}
 	return jsonify(res)
+#get /gene/<dataset>
+@app.route('/gene/<string:dataset>')
+def get_gene(dataset):
+	if not dataset in dbs:
+		abort(404)
+	gene_name = request.args.get('gene')
+	gene = find_gene(gene_name)
+	#print(gene)
+	if gene: 
+		chrom, start, end = gene
+		if end < start: start, end = end, start
+	else:
+		abort(404)
+	try:
+		idx = request.args.get('headers')
+		if idx:
+			idx = [int(i) for i in idx.split(' ')]
+			col_filter = index_get_func(idx)
+		else:
+			col_filter = list
+	except:
+		col_filter = list
+	if not chrom : abort(400)
+	try:
+		start, end = int(start), int(end)
+	except:
+		abort(400)
+
+	#prepare result
+	query_result = dbs[dataset].region_query(chrom, start, end, col_filter)
+	page = query_result.get_cur_page()
+	pid = ''
+	if query_result.has_next():
+		pid = PH.put(query_result)
+		next_page = config.HOST + "/nextpage/" + pid
+	else:
+		next_page =  'None'
+	header = dbs[dataset].get_header_list()
+	res = { 'format': 'json', 
+		'gene_info':{
+			'uniprot_id':gene_name,
+			'contig': chrom,
+			'start':start,
+			'end':end
+		},
+		'data':page,
+		'next_page': next_page,
+		'page_info': query_result.get_page_info(),
+		'page_id':pid,
+		'headers': header}
+	return jsonify(res)
 
 @app.route('/gotopage/<string:pid>/<int:pnum>')
 def get_page(pid, pnum):
@@ -131,6 +185,17 @@ def get_nextpage(pid):
 		'next_page': next_page}
 	return jsonify(res)
 
+@app.route('/rs/<string:rsid>')
+def get_rs(rsid):
+	res = idx_db.k_get(rsid)
+	return jsonify({'data':res})
+
+@app.route('/variant/<string:vid>')
+def get_variant(vid):
+	res = idx_db.k_get(vid)
+	return jsonify({'data':res})
+
+
 @app.route('/anno_tree/<string:dataset>')
 def get_anno_tree(dataset):
 	if not dataset in dbs:
@@ -140,5 +205,7 @@ def get_anno_tree(dataset):
 		if idx in tree_dic:
 			del tree_dic[idx]
 	return jsonify({"header_tree_array":[tree_dic[i].get_dic() for i in sorted(tree_dic.keys())]})
+
+
 
 app.run(host="0.0.0.0", port=5000)

@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from Bio.bgzf import BgzfReader
 import gzip, os, fnmatch
 import config
 
@@ -41,7 +42,7 @@ def init_sqlite_index_tables(contigs, metadata):
 		
 def load_datafile_index(cls, data_file, session):
 	try:
-		f = gzip.open(data_file)
+		f = BgzfReader(filename=data_file)
 		print("load data index for ", data_file)
 		#return
 	except:
@@ -51,14 +52,18 @@ def load_datafile_index(cls, data_file, session):
 	offset = f.tell()
 	index_data = {}
 	vs = []
+	count = 0
 	for line in f:
-		line = line.decode("utf-8")
+		count += 1
+		if count % 10000 == 0:
+			print(count)
+			#if count > 10000:break
 		k1 = get_v_id(line)
 		k2 = get_single_key(line)
-		vs.append(cls.insert().values(rsid=k2, vid=k1, contig=line.split("\t")[0], pt=offset).execute())
+		cls.insert().values(rsid=k2, vid=k1, contig=line.split("\t")[0], pt=offset).execute()
 		offset = f.tell()
-	session.add_all(vs)
-	session.commit()
+	#session.add_all(vs)
+	#session.commit()
 
 def db_init(anno_data = False):
 	contigs, data_files = init_scan_folder("HRC")
@@ -70,6 +75,10 @@ def db_init(anno_data = False):
 	tables = init_sqlite_index_tables(contigs, metadata)
 	if anno_data:
 		#create anno index tables
+		try:
+			for i in tables: tables[i].drop(engine)
+		except:
+			pass
 		metadata.create_all(engine)
 		#load anno index data
 		for i in range(len(contigs)):
@@ -79,4 +88,4 @@ def db_init(anno_data = False):
 		
 
 if __name__ == "__main__":
-	db_init(False, True)
+	db_init(True)
