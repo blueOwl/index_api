@@ -40,7 +40,7 @@ The following table lists all API endpoints currently available at
 |`/variant/<string:dataset name>`|Get single variant by chromosomal position or identifier.|
 |`/region/<string:dataset name>`|Get all variants within a chromosomal region.|
 |`/gotopage/<string:query id>/<int:page number>`|Get the data for a certain query of certain page number.|
-|`/gene`|Get the genome interval for a gene.|
+|`/gene`|Get the genome interval for a gene, and all variants within this interval.|
 |`/batch/<string:dataset name>`|Get all variants in a region. Store the result in a temporary file and return the link for that file.|
 ### 3.1 Get annotation headers
 
@@ -160,7 +160,7 @@ To query all variants within a region, send `GET` request to
 }
 ~~~
 
-####3.3.2
+####3.3.2 Pagination
 
 To get certain page of a query, retrieve it by `page_id`. Send `GET` request to 
 `/gotopgae/<string:page id>/<int:page number>`
@@ -173,36 +173,44 @@ To get certain page of a query, retrieve it by `page_id`. Send `GET` request to
 
 Same as 3.1.1
 
+####3.3.3 File Download
+
+Two step request shuold be sent to get the result storing in a file, and get the URL for that file.
+
+1. send a normal region query request and get a `page_id`
+2. send query `page_id` to `/total_res/<pid> `
+
+	e.g. `/total_res/e16fa443-cc46-4737-8016-9f96054d1e8e`
+   
+   It will a URL inside a json.
+   
+   e.g. `"{"url":"/download/tmp/7fbf1b2d-d97f-4047-9e57-8008d0b1da04"}"`
+ 
+
 ### 3.4 Single variant query
 To query a single variant, send `GET` request to 
 
-`http://206.189.218.218:5000/api/variant`.The following table lists all supported parameters.
-
-|Parameter | Required | Description |
-|------------|---------|----|
-|`chrom `| Yes|Chromosome name.|
-|`pos`| Yes |Chromosomal position in base-pairs.|
-|`ref`| Optional |Reference alle.|
-|`alt`| Optional |Alternative alle|
+`/rs/<rsid>` for rs id or `/variant/<variant id>` for variant query. Variant id is in format `contig:pos:ref:alt`. No additional parameters support.
 
 **Examples:**
 
-#### 3.4.1 	Find a variant 
+`/rs/rs111739080`
 
-`http://206.189.218.218:5000/api/variant?chrom=chr2&pos=100008&ref=T&alt=A`
-
-
-#### 3.4.1 	Find all variants at a position 
-`http://206.189.218.218:5000/api/variant?chrom=chr2&pos=100008`
+`/variant/18:10636:A:C`
 
 ### 3.5 Gene query
 
-to do
+`/gene/<dataset>`
+
+e.g.
+`/gene/HRC?gene=NP_001073678`
+
+Other parameters are the same with region query.
 
 ### 3.6 Batch query
-To query a batch of variants, send `GET` request to 
+To query a batch of variants, send `pos` request to 
 
-`http://206.189.218.218:5000/api/batch/<string:dataset name>` 
+`http://206.189.218.218:5000/batch/<string:dataset name>` 
 
 Parameters are the same with region query.
 
