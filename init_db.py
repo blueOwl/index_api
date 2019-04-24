@@ -40,7 +40,7 @@ def init_sqlite_index_tables(contigs, metadata):
 		)
 	return tables
 		
-def load_datafile_index(cls, data_file, session):
+def load_datafile_index(cls, data_file, conn):
 	try:
 		f = BgzfReader(filename=data_file)
 		print("load data index for ", data_file)
@@ -55,13 +55,17 @@ def load_datafile_index(cls, data_file, session):
 	count = 0
 	for line in f:
 		count += 1
-		if count % 10000 == 0:
+		if count % 100000 == 0:
 			print(count)
+			conn.execute(cls.insert(), vs)
+			vs = []
 			#if count > 10000:break
 		k1 = get_v_id(line)
 		k2 = get_single_key(line)
-		cls.insert().values(rsid=k2, vid=k1, contig=line.split("\t")[0], pt=offset).execute()
+		value = {'rsid':k2, 'vid':k1, 'contig':line.split("\t")[0], 'pt':offset}
+		vs.append(value)
 		offset = f.tell()
+	conn.execute(cls.insert(), vs)
 	#session.add_all(vs)
 	#session.commit()
 
@@ -70,6 +74,7 @@ def db_init(anno_data = False):
 	metadata = MetaData()
 	engine = create_engine('sqlite:///anno.db')
 	metadata.bind = engine
+	conn = engine.connect()
 	Session = sessionmaker(bind=engine)
 	session = Session()
 	tables = init_sqlite_index_tables(contigs, metadata)
@@ -83,7 +88,7 @@ def db_init(anno_data = False):
 		#load anno index data
 		for i in range(len(contigs)):
 			contig, data_file = contigs[i], data_files[i]
-			load_datafile_index(tables[contig], data_file, session)
+			load_datafile_index(tables[contig], data_file, conn)
 	return tables, contigs, data_files
 		
 
