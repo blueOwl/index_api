@@ -177,13 +177,12 @@ class Retrieve:
 
 	def region_query(self, chrom, start, end, col_filter=list):
 		if not chrom in self.r['used_chroms_names']:return QueryResult(empty_generator)
-		self.col_filter = col_filter
 		try:
 			start, end = int(start), int(end)
 		except:
 			[]
 		q = QueryResult(self.r['tabix_links'][chrom].fetch, {'reference':chrom, 'start':start, 'end':end, 'multiple_iterators':True, 'parser':pysam.asTuple()}, col_converter=col_filter)
-		q.headers = self.get_header_list()
+		q.headers = self.get_header_list(col_filter=col_filter)
 		q.info['dataset'] = self.dataset
 		return q
 
@@ -203,11 +202,11 @@ class Retrieve:
 		if not chrom in self.r['used_chroms_names']:
 			return {}
 		return {i:self.r['used_header'][chrom][i] for i in self.col_filter(range(len(self.r['used_header'][chrom])))}
-	def get_header_list(self, chrom = ''):
+	def get_header_list(self, col_filter=list, chrom = ''):
 		if not chrom: chrom = self.r['used_chroms_names'][0]
 		if not chrom in self.r['used_chroms_names']:
 			return {}
-		return [self.r['used_header'][chrom][i] for i in self.col_filter(range(len(self.r['used_header'][chrom])))]
+		return [self.r['used_header'][chrom][i] for i in col_filter(range(len(self.r['used_header'][chrom])))]
 		
 
 	def get_des_file_name(self):

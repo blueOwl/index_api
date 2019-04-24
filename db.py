@@ -26,12 +26,15 @@ def find_gene(g):
 		return [res.contig, res.start, res.end]
 	except:
 		return []
-def rs_key_get(k, filter_fun):
+def key_get(k, filter_fun):
 	res = ''
 	for i in tables:
 		table = tables[i]
 		try:	
-			res = session.query(table).filter(table.c.rsid==k).one()
+			if k[:2] == 'rs':
+				res = session.query(table).filter(table.c.rsid==k).one()
+			else:
+				res = session.query(table).filter(table.c.vid==k).one()
 			break
 		except:
 			pass
@@ -52,6 +55,6 @@ if __name__ == "__main__":
 	gene2 = 'NP_006834'
 	#print(find_gene(gene1))
 	#print(find_gene(gene2))
-	res = rs_key_get(id1, list)
+	res = key_get(id1, list)
 	print(res)
 #session.query(tables['18']).filter(tables['18'].c.rsid==id1).one()

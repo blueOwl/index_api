@@ -14,7 +14,12 @@ CORS(app)
 dbs = {}
 for k in ['HRC']:
 	dbs[k] = Retrieve(k)
-idx_db = H_idx("HRC")
+full_headers = dbs[k].get_header_list()
+single_page_info = {"page_num":1,
+                 "total_page":1,
+                 "page_size":1}
+#idx_db = H_idx("HRC")
+#idx_db = {}
 
 #get /header/<dataset>
 @app.route('/header/<string:dataset>')
@@ -76,7 +81,8 @@ def get_region(dataset):
 		next_page = config.HOST + "/nextpage/" + pid
 	else:
 		next_page =  'None'
-	header = dbs[dataset].get_header_list()
+	#header = dbs[dataset].get_header_list()
+	header = query_result.headers
 	res = { 'format': 'json', 
 		'data':page,
 		'next_page': next_page,
@@ -88,6 +94,7 @@ def get_region(dataset):
 @app.route('/gene/<string:dataset>')
 def get_gene(dataset):
 	if not dataset in dbs:
+		print('dataset not found')
 		abort(404)
 	gene_name = request.args.get('gene')
 	gene = find_gene(gene_name)
@@ -96,6 +103,7 @@ def get_gene(dataset):
 		chrom, start, end = gene
 		if end < start: start, end = end, start
 	else:
+		print('no gene')
 		abort(404)
 	try:
 		idx = request.args.get('headers')
@@ -106,10 +114,13 @@ def get_gene(dataset):
 			col_filter = list
 	except:
 		col_filter = list
-	if not chrom : abort(400)
+	if not chrom : 
+		print('chrom not found')
+		abort(400)
 	try:
 		start, end = int(start), int(end)
 	except:
+		print('gene info wrong')
 		abort(400)
 
 	#prepare result
@@ -121,7 +132,8 @@ def get_gene(dataset):
 		next_page = config.HOST + "/nextpage/" + pid
 	else:
 		next_page =  'None'
-	header = dbs[dataset].get_header_list()
+	#header = dbs[dataset].get_header_list()
+	header = query_result.headers
 	res = { 'format': 'json', 
 		'gene_info':{
 			'uniprot_id':gene_name,
@@ -187,13 +199,19 @@ def get_nextpage(pid):
 
 @app.route('/rs/<string:rsid>')
 def get_rs(rsid):
-	res = idx_db.k_get(rsid)
-	return jsonify({'data':res})
+	res = key_get(rsid, list)
+	return jsonify({'data':res, 
+			'page_info':single_page_info,
+			'page_id':'',
+			"headers":full_headers})
 
 @app.route('/variant/<string:vid>')
 def get_variant(vid):
-	res = idx_db.k_get(vid)
-	return jsonify({'data':res})
+	res = key_get(vid, list)
+	return jsonify({'data':res,
+			'page_id':'',
+			'page_info':single_page_info,
+			"headers":full_headers})
 
 
 @app.route('/anno_tree/<string:dataset>')
