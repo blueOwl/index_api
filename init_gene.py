@@ -44,6 +44,9 @@ def load_mapping_data(datafile, session):
 	session.add_all(data)
 
 if __name__ == "__main__":
+	engine = create_engine('sqlite:///anno.db')
+	Session = sessionmaker(bind=engine)
+	session = Session()
 	Base.metadata.create_all(engine, tables=[Gene.__table__, GeneMapping.__table__])
 	print('load gene data')
 	#load_gene_data(config.gene_data, session)
