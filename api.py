@@ -6,6 +6,7 @@ from flask_cors import CORS
 from hash_idx import H_idx
 from db import *
 import config
+import uuid
 
 PH = PageHolder()
 app = Flask(__name__)
@@ -223,6 +224,26 @@ def get_anno_tree(dataset):
 		if idx in tree_dic:
 			del tree_dic[idx]
 	return jsonify({"header_tree_array":[tree_dic[i].get_dic() for i in sorted(tree_dic.keys())]})
+
+@app.route('/vcf', methods=['POST'])
+def vcf_intersect():
+	idx = request.values.get('headers')
+	if idx:
+		idx = [int(i) for i in idx.split(' ')]
+		col_filter = index_get_func(idx)
+	else:
+		col_filter = list
+	vcf_file = request.files.get('vcf')
+	if not vcf_file: abort(404)
+	
+	res = intersect_vcf(vcf_file, col_filter)
+	filename =  str(uuid.uuid4())
+	f = open(config.TMPDIR["HRC"] + filename, 'w')
+	f.write("\t".join(col_filter(full_headers)) + "\n")
+	for i in res:
+		f.write('\t'.join(i) + "\n")
+	
+	return jsonify({"url": "/download/" + 'tmp/' + filename})
 
 
 
