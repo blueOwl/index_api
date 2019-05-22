@@ -234,6 +234,16 @@ def vcf_intersect():
 	else:
 		col_filter = list
 	vcf_file = request.files.get('vcf')
+	#print([i for i in request.values])
+	#print([i for i in request.files])
+	#print([i for i in request.args])
+	#print(request.get_json())
+	#try:
+	if not vcf_file:
+		req_json = request.get_json()
+		print([i for i in req_json['params']])
+		idx = [int(i) for i in req_json['params']['headers'] if not i == ' ']
+		vcf_file = [i.encode('utf8') for i in req_json['params']['uploadList']['ids'].split('\n')]
 	if not vcf_file: abort(404)
 	
 	res = intersect_vcf(vcf_file, col_filter)
