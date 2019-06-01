@@ -150,7 +150,7 @@ To query all variants within a region, send `GET` request to
     "4": "ANNOVAR_ensembl_Effect",
     "5": "ANNOVAR_ensembl_Transcript_ID"
   },
-  "next_page": "http://127.0.0.1:5000/nextpage/ca2c39d1-6dfd-4c11-8292-478298a7e9ed",
+  "next_page": "http://bioghost.usc.edu:5000/nextpage/ca2c39d1-6dfd-4c11-8292-478298a7e9ed",
   "page_id": "ca2c39d1-6dfd-4c11-8292-478298a7e9ed",
   "page_info": {
     "page_num": 1,
@@ -176,7 +176,7 @@ Same as 3.1.1
 ### 3.4 Single variant query
 To query a single variant, send `GET` request to 
 
-`http://206.189.218.218:5000/api/variant`.The following table lists all supported parameters.
+`http://bioghost.usc.edu:5000/api/variant`.The following table lists all supported parameters.
 
 |Parameter | Required | Description |
 |------------|---------|----|
@@ -189,11 +189,11 @@ To query a single variant, send `GET` request to
 
 #### 3.4.1 	Find a variant 
 
-`http://206.189.218.218:5000/api/variant?chrom=chr2&pos=100008&ref=T&alt=A`
+`http://bioghost.usc.edu:5000/api/variant?chrom=chr2&pos=100008&ref=T&alt=A`
 
 
 #### 3.4.1 	Find all variants at a position 
-`http://206.189.218.218:5000/api/variant?chrom=chr2&pos=100008`
+`http://bioghost.usc.edu:5000/api/variant?chrom=chr2&pos=100008`
 
 ### 3.5 Gene query
 
@@ -202,7 +202,7 @@ to do
 ### 3.6 Batch query
 To query a batch of variants, send `GET` request to 
 
-`http://206.189.218.218:5000/api/batch/<string:dataset name>` 
+`http://bioghost.usc.edu:5000/api/batch/<string:dataset name>` 
 
 Parameters are the same with region query.
 
