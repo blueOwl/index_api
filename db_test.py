@@ -16,19 +16,16 @@ session = Session()
 tables, contigs, data_files = db_init()
 def find_gene(g):
 	print("search gene", g)
-	try:
-		res = session.query(
-				GeneMapping, Gene
-			).filter(
-				GeneMapping.mapping_name == g
-			).filter(
-				GeneMapping.unprot_name == Gene.unprot_name
-			).first()
-		res = res[1]
-		return [res.contig, res.start, res.end]
-	except:
-		print("gene search error")
-		return []
+	res = session.query(
+			GeneMapping, Gene
+		).filter(
+			GeneMapping.mapping_name == g
+		).filter(
+			GeneMapping.unprot_name == Gene.unprot_name
+		).first()
+	res = res[1]
+	return [res.contig, res.start, res.end]
+	return []
 def key_get(k, filter_fun=list):
 	res = ''
 	for i in tables:

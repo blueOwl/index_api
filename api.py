@@ -46,7 +46,7 @@ def download_file(folder, name):
 def get_origin(dataset):
 	if not dataset in dbs:
 		abort(404)
-	link_list = [config.HOST + "/download/" + 'data/' + name for name in dbs[dataset].get_data_file_names()]
+	link_list = [ "/download/" + 'data/' + name for name in dbs[dataset].get_data_file_names()]
 	res = {'data':link_list,
                 'format': 'links'}
 	return jsonify(res)
@@ -110,6 +110,7 @@ def get_gene(dataset):
 		idx = request.args.get('headers')
 		if idx:
 			idx = [int(i) for i in idx.split(' ')]
+			print("gene query with headers", idx)
 			col_filter = index_get_func(idx)
 		else:
 			col_filter = list
@@ -201,7 +202,7 @@ def get_nextpage(pid):
 @app.route('/rs/<string:rsid>')
 def get_rs(rsid):
 	res = key_get(rsid, list)
-	return jsonify({'data':res, 
+	return jsonify({'data':[res], 
 			'page_info':single_page_info,
 			'page_id':'',
 			"headers":full_headers})
@@ -209,7 +210,7 @@ def get_rs(rsid):
 @app.route('/variant/<string:vid>')
 def get_variant(vid):
 	res = key_get(vid, list)
-	return jsonify({'data':res,
+	return jsonify({'data':[res],
 			'page_id':'',
 			'page_info':single_page_info,
 			"headers":full_headers})
@@ -227,12 +228,7 @@ def get_anno_tree(dataset):
 
 @app.route('/vcf', methods=['POST'])
 def vcf_intersect():
-	idx = request.values.get('headers')
-	if idx:
-		idx = [int(i) for i in idx.split(' ')]
-		col_filter = index_get_func(idx)
-	else:
-		col_filter = list
+	idx = []#request.values.get('headers')
 	vcf_file = request.files.get('vcf')
 	#print([i for i in request.values])
 	#print([i for i in request.files])
@@ -242,9 +238,16 @@ def vcf_intersect():
 	if not vcf_file:
 		req_json = request.get_json()
 		print([i for i in req_json['params']])
-		idx = [int(i) for i in req_json['params']['headers'] if not i == ' ']
+		print("H", req_json['params']['headers'])
+		idx = [int(i) for i in req_json['params']['headers'].split(' ') if not i == ' ']
 		vcf_file = [i.encode('utf8') for i in req_json['params']['uploadList']['ids'].split('\n')]
 	if not vcf_file: abort(404)
+	if idx:
+		idx = sorted(list(set([int(i) for i in idx])))
+		print(idx)
+		col_filter = index_get_func(idx)
+	else:
+		col_filter = list
 	
 	res = intersect_vcf(vcf_file, col_filter)
 	filename =  str(uuid.uuid4())

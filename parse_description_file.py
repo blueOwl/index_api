@@ -2,7 +2,7 @@ from retrieve import Retrieve
 import config
 
 class Annotation_tree_node:
-	def __init__(self, nid=0, parent_id=0, info='', name="root"):
+	def __init__(self, nid=0, parent_id=0, info='', name="All annotations"):
 		self.id = nid
 		self.parent_id = parent_id
 		self.info = info
@@ -41,7 +41,7 @@ def parse_des_file(filename):
 
 def generate_tree_dic(headers, des):
 	root = Annotation_tree_node(parent_id=None, nid=10000)
-	tree_dic = {'root':root}
+	tree_dic = {'All annotations':root}
 	parent_id_count = len(headers.keys()) + 1
 	for i in headers:
 		nid = i

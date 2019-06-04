@@ -148,7 +148,7 @@ class QueryResult:
 		return False
 	def get_page_info(self):
 		return {"page_num":self.page_num - 1,
-		 "total_page":self.total_page,
+		 "total_page":self.records_num, #self.total_page,
 		 "page_size":self.page_size}
 
 	def write_to_file(self, res_dir = ''):

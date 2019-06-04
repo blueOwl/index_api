@@ -42,13 +42,15 @@ def load_mapping_data(datafile, session):
 		unprot_name, mapping_name = line[0], line[1]
 		data.append(GeneMapping(unprot_name=unprot_name, mapping_name=mapping_name))
 	session.add_all(data)
+	session.commit()
 
 if __name__ == "__main__":
 	engine = create_engine('sqlite:///anno.db')
 	Session = sessionmaker(bind=engine)
 	session = Session()
 	Base.metadata.create_all(engine, tables=[Gene.__table__, GeneMapping.__table__])
-	print('load gene data')
+	#print('load gene data')
 	#load_gene_data(config.gene_data, session)
+	print('load gene mapping data')
 	load_mapping_data(config.mapping_data, session)
 	pass
